@@ -1,13 +1,12 @@
-import { ReactNode } from "react";
+// app/notes/filter/layout.tsx
+import css from './LayoutNotes.module.css';
 
-import css from "./LayoutNotes.module.css";
+interface NotesLayoutProps {
+  sidebar: React.ReactNode;
+  children: React.ReactNode;
+}
 
-type NotesLayoutProps = {
-  children: ReactNode;
-  sidebar: ReactNode;
-};
-
-const NotesLayout = ({ children, sidebar }: NotesLayoutProps) => {
+const NotesLayout = ({ sidebar, children }: NotesLayoutProps) => {
   return (
     <section className={css.container}>
       <aside className={css.sidebar}>{sidebar}</aside>

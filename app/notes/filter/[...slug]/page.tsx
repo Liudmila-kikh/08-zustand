@@ -1,38 +1,58 @@
+// app/notes/filter/[...slug]/page.tsx
+
+import { Metadata } from 'next';
 import {
-  dehydrate,
-  HydrationBoundary,
   QueryClient,
-} from "@tanstack/react-query";
+  HydrationBoundary,
+  dehydrate,
+} from '@tanstack/react-query';
+import { fetchNotes } from '@/lib/api';
+import NotesClient from './Notes.client';
 
-import { fetchNotes } from "@/lib/api";
-import NotesClient from "./Notes.client";
-import { NoteTag } from "@/types/note";
-
-type NotesPageProps = {
+interface NotesProps {
   params: Promise<{ slug: string[] }>;
-};
+}
 
-const NotesPage = async ({ params }: NotesPageProps) => {
+export async function generateMetadata({
+  params,
+}: NotesProps): Promise<Metadata> {
+  const { slug } = await params;
+  return {
+    title: `${slug[0][0].toUpperCase() + slug[0].slice(1)} Notes`,
+    description: `A list of ${slug[0]} notes`,
+    openGraph: {
+      title: `${slug[0][0].toUpperCase() + slug[0].slice(1)} Notes`,
+      description: `A list of ${slug[0]} notes`,
+      url: `https://notehub.com/notes/filter/${slug[0]}`,
+      images: [
+        {
+          url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
+          width: 1200,
+          height: 630,
+          alt: 'NoteHub',
+        },
+      ],
+    },
+  };
+}
+
+const Notes = async ({ params }: NotesProps) => {
   const queryClient = new QueryClient();
-
-  const search = "";
+  const { slug } = await params;
+  const tag = slug[0] === 'all' ? '' : slug[0];
+  const search = '';
   const page = 1;
 
-  const tag = (await params).slug?.[0];
-  const allowedTag = Object.values(NoteTag).includes(tag as NoteTag)
-    ? (tag as NoteTag)
-    : undefined;
-
   await queryClient.prefetchQuery({
-    queryKey: ["notes", search, page, allowedTag],
-    queryFn: () => fetchNotes({ search: search, page: page, tag: allowedTag }),
+    queryKey: ['notes', tag],
+    queryFn: () => fetchNotes(search, page, tag),
   });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <NotesClient search={search} page={page} tag={allowedTag} />
+      <NotesClient tag={tag} />
     </HydrationBoundary>
   );
 };
 
-export default NotesPage;
+export default Notes;

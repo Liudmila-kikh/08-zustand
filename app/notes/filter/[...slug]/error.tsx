@@ -1,9 +1,11 @@
-"use client";
+// app/notes/error.tsx
 
-type Props = {
+'use client';
+
+interface Props {
   error: Error;
   reset: () => void;
-};
+}
 
 const Error = ({ error, reset }: Props) => {
   return (
